@@ -75,6 +75,26 @@ from product
 where (sale_price*0.9-purchase_price) > 100
 and (product_type = '办公用品' or product_type = '厨房用具');
 
+-- 在mysql中，当顺序为升序时，NULL值排在第一位，当顺序为降序时，NULL排在最后一位
+/*需求1：将NULL值排在末行，同时将所有非NULL值按升序排列
+      1.对于数字或者日期类型，可以在排序字段前加一个负号来得到反向排序：order by -data_login DESC
+      2.对于字符型或者字符型数字，可以使用IS NULL比较运算符或者ISNULL()：order by name IS NULL ASC, name ASC或者order by ISNULL(name) ASC, name ASC
+        或者使用COALESCE实现：order by COALESCE(name,'zzzzz') ASC
+  需求2: 将NULL值排在首行，同时将所有非NULL值按倒序排列
+      1.对于数字或者日期类型，可以在排序字段前加一个负号来得到反向排序：order by -data_login ASC
+      2.对于字符型或者字符型数字，可以使用IS NOT NULL比较运算符或者!ISNULL()：order by name IS NOT NULL ASC, name DESC或者order by !ISNULL(name) ASC, name DESC
+        或者使用COALESCE实现：order by COALESCE(name,'zzzzz') DESC
+*/
 
+-- 5.求出销售单价（ sale_price 列）合计值大于进货单价（ purchase_price 列）合计值1.5倍的商品种类。
+SELECT product_type
+			,sum(sale_price) as sum_sale_price
+			,sum(purchase_price) as sum_purchase_price
+from product
+group by product_type
+having sum_sale_price > sum_purchase_price*1.5;
 
-
+-- 6.按照以下要求排序：先按照regist_date进行降序，NULL值排最前，相同的regist_date按照purchase_price进行升序
+select *
+from product
+ORDER BY -regist_date, purchase_price;
