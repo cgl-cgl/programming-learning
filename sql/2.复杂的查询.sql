@@ -31,3 +31,20 @@ where sale_price > (select avg(sale_price)
 			    from product p2
 				 where p1.product_type = p2.product_type)
 and sale_price > 1000;
+
+-- IN/NOT IN是无法选取出NULL数据
+-- IN(NOT IN)谓词具有其他谓词所没有的用法：可以使用子查询作为其参数
+-- EXISTS是只有1个参数的谓词，只需要在右侧书写1个参数，该参数通常都会是一个子查询
+
+-- 5.四则运算中含有NULL时（不进行特殊处理的情况下），运算结果会变为NULL
+-- 6.IN和NOT IN谓词无法选取出NULL数据，因此NOT IN或IN中存在NULL时，得到的结果就是NULL
+/* 7.按照销售单价( sale_price )对product（商品）表中的商品进行如下分类。
+低档商品：销售单价在1000日元以下（T恤衫、办公用品、叉子、擦菜板、 圆珠笔）
+中档商品：销售单价在1001日元以上3000日元以下（菜刀）
+高档商品：销售单价在3001日元以上（运动T恤、高压锅）
+请编写出统计上述商品种类中所包含的商品数量的 SELECT 语句
+*/
+select sum(case when sale_price <= 1000 then 1 else 0 end) as 'low_price'
+			,sum(case when sale_price <= 3000 and sale_price > 1000 then 1 else 0 end) as 'mid_price'
+			,sum(case when sale_price > 3000 then 1 else 0 end) as 'mid_price'
+from product
