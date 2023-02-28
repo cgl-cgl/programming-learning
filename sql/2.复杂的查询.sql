@@ -26,13 +26,20 @@ select *
 			    from product) as sale_price_avg
 from product;
 
--- 求出各商品种类的平均销售单价
-select *
-from product
-where sale_price > (select avg(sale_price)
+-- 4.求出各商品种类的平均销售单价，并保存为视图AvgPriceByType
+create view AvgPriceByType AS
+select product_id
+      ,product_name
+			,product_type
+			,sale_price
+			,(select AVG(sale_price)
 			    from product p2
-				 where p1.product_type = p2.product_type)
-and sale_price > 1000;
+				 where p1.product_type = p2.product_type) as sale_price_avg_type
+from product p1;
+
+select *
+from AvgPriceByType;
+
 
 -- IN/NOT IN是无法选取出NULL数据
 -- IN(NOT IN)谓词具有其他谓词所没有的用法：可以使用子查询作为其参数
@@ -46,7 +53,7 @@ and sale_price > 1000;
 高档商品：销售单价在3001日元以上（运动T恤、高压锅）
 请编写出统计上述商品种类中所包含的商品数量的 SELECT 语句
 */
-select sum(case when sale_price <= 1000 then 1 else 0 end) as 'low_price'
-			,sum(case when sale_price <= 3000 and sale_price > 1000 then 1 else 0 end) as 'mid_price'
-			,sum(case when sale_price > 3000 then 1 else 0 end) as 'mid_price'
-from product
+select sum(case when sale_price <= 1000 then 1 else 0 end) as low_price
+			,sum(case when sale_price <= 3000 and sale_price > 1000 then 1 else 0 end) as mid_price
+			,sum(case when sale_price > 3000 then 1 else 0 end) as high_price
+from product;
