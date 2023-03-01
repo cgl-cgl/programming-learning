@@ -64,7 +64,91 @@ inner join product t2
 on t1.product_id = t2.product_id
 where t2.product_type = '衣服';
 
+-- 7.使用连结两个子查询和不使用子查询的方式, 找出东京商店里, 售价低于 2000 的商品信息
+-- 不使用子查询
+select t1.shop_id,
+       t1.shop_name,
+			 t1.product_id,
+			 t1.quantity,
+			 t2.product_id,
+			 t2.product_name,
+			 t2.product_type,
+			 t2.sale_price
+from shopproduct t1
+inner join product t2
+on t1.product_id = t2.product_id
+where t2.sale_price<= 2000
+and t1.shop_name = '东京';
+-- 使用子查询
+select t1.shop_id,
+       t1.shop_name,
+			 t1.product_id,
+			 t1.quantity,
+			 t2.product_id,
+			 t2.product_name,
+			 t2.product_type,
+			 t2.sale_price
+from (select *
+        from shopproduct
+			 where shop_name = '东京') t1
+inner join (select *
+              from product
+						 where sale_price<= 2000)  t2
+on t1.product_id = t2.product_id;
 
+
+-- 8.每个商店中, 售价最高的商品的售价分别是多少
+select t1.shop_id,
+			 max(t2.sale_price) as max_sale_price
+ from shopproduct t1
+ inner join product t2
+ on t1.product_id = t2.product_id
+ group by t1.shop_id
+
+ /*拓展：
+ t1商店表：商店id，商品id
+ t2商品表：商品id，商品销售价格
+ 展示 每间商店最贵的商品(三个字段：商店id，商品id，商品最高销售价格）
+ */
+ -- 关联子查询
+ select t1.shop_id,
+							t1.product_id,
+							t2.sale_price
+				from shopproduct t1
+       INNER JOIN product t2 
+			  on t1.product_id = t2.product_id 
+where t2.sale_price  = (SELECT max(a.sale_price)
+                        from (select t1.shop_id,
+																			t1.product_id,
+																			t2.sale_price
+																from shopproduct t1
+															 INNER JOIN product t2 
+																on t1.product_id = t2.product_id )a
+												where t1.shop_id = a.shop_id);
+-- 联结
+select a.*
+from 
+ (select t1.shop_id,
+							t1.product_id,
+							t2.sale_price
+				from shopproduct t1
+       INNER JOIN product t2 
+			  on t1.product_id = t2.product_id )a
+INNER JOIN (select t1.shop_id,
+										min(t2.sale_price) as max_sale_price
+							from shopproduct t1
+						 INNER JOIN product t2 
+							on t1.product_id = t2.product_id 
+							GROUP BY t1.shop_id)b
+	on a.shop_id = b.shop_id
+	and a.sale_price = b.max_sale_price;
+ 
+ -- 窗口函数
+ 
+ 
+ 
+ 
+ 
 
 
 
