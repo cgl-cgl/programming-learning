@@ -152,6 +152,32 @@ INNER JOIN (select t1.shop_id,
 
 
 
+-- 自然连结NATURAL JOIN：内连结的一种特例，当两个表进行自然连结时，会按照两个表中都包含的列名来进行等值内连结，无需使用ON指定连接条件
+
+select *
+from product
+NATURAL JOIN product2
+
+-- 使用内连结求 Product 表和 Product2 表的交集
+
+select t1.*
+from product t1
+INNER JOIN product2 t2
+on t1.product_id = t2.product_id
+and t1.product_name = t2.product_name
+and t1.product_type = t2.product_type
+and t1.sale_price = t2.sale_price
+and t1.purchase_price = t2.purchase_price
+and t1.regist_date = t2.regist_date;
+
+-- 外连结（左连结、右连结、外连结）
+
+
+
+
+
+
+
 
 
 

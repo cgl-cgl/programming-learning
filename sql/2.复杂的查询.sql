@@ -57,3 +57,4 @@ select sum(case when sale_price <= 1000 then 1 else 0 end) as low_price
 			,sum(case when sale_price <= 3000 and sale_price > 1000 then 1 else 0 end) as mid_price
 			,sum(case when sale_price > 3000 then 1 else 0 end) as high_price
 from product;
+
