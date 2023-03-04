@@ -171,7 +171,13 @@ and t1.purchase_price = t2.purchase_price
 and t1.regist_date = t2.regist_date;
 
 -- 外连结（左连结、右连结、外连结）
-
+-- 统计每种商品分别在哪些商店有售, 需要包括那些在每个商店都没货的商品。
+select t1.product_id,
+			 t1.product_name,
+			 t2.shop_name
+from product t1
+left join shopproduct t2
+on t1.product_id = t2.product_id;
 
 
 
