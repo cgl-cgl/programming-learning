@@ -180,7 +180,51 @@ left join shopproduct t2
 on t1.product_id = t2.product_id;
 
 
+-- 使用外连结从ShopProduct表和Product表中找出那些在某个商店库存少于50的商品及对应的商店
+-- 注意：如果此时where条件写在最外层时，两个库存为空的商品就不会被筛选出来，因此要注意where条件的位置
+SELECT t1.product_id,
+		   t1.product_name,
+			 t1.sale_price,
+			 t2.shop_id,
+			 t2.shop_name,
+			 t2.quantity
+ from product t1
+left join (select *
+						from shopproduct
+						where quantity < 50)t2
+			on t1.product_id = t2.product_id;
+			
+-- 使用内连接找出每个商店都有哪些商品, 每种商品的库存总量分别是多少
+/*
+1.INNER JOIN不管连接多少表，连接条件来自主表或者是上一个inner join的表得到的结果都是一样的
+2.LEFG JOIN的连接条件便会影响筛选出来的结果，比如p为主表，left join sp和ip（前提：p和ip的id相等，sp的id较少）连接条件1为p.id = sp.id
+连接条件2如果为p.id = ip.id，那么ip的所有id都能被选择出来；
+连接条件2如果为sp.id = ip.id，那么ip被选择出来的id与sp是相等的
+*/
+select sp.shop_name,
+			 p.product_name,
+			 ip.inventory_id,
+			 ip.inventory_quantity
+from shopproduct sp
+inner join product p
+on sp.product_id = p.product_id
+inner JOIN inventoryproduct ip
+on sp.product_id = ip.product_id;
 
+-- ON子句非等值连结：比较运算符(<,<=,>,>=,BETWEEN)和谓词运算(LIKE,IN,NOT等等)都能作为连结条件
+
+
+
+
+
+
+
+
+
+
+
+
+ORDER BY sp.shop_name;
 
 
 
