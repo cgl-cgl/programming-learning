@@ -212,6 +212,15 @@ inner JOIN inventoryproduct ip
 on sp.product_id = ip.product_id;
 
 -- ON子句非等值连结：比较运算符(<,<=,>,>=,BETWEEN)和谓词运算(LIKE,IN,NOT等等)都能作为连结条件
+-- 对 Product 表中的商品按照售价赋予排名. 一个从集合论出发,使用自左连结的思路是, 对每一种商品,找出售价不低于它的所有商品, 然后对售价不低于它的商品使用 COUNT 函数计数
+
+SELECT t1.product_name,
+       RANK() OVER(ORDER BY COUNT(t2.product_name)) AS rank1
+FROM product t1
+LEFT JOIN product t2
+ON t1.sale_price <= t2.sale_price
+AND t1.product_id != t2.product_id
+GROUP BY t1.product_name
 
 
 
