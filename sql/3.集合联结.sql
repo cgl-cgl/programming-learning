@@ -222,6 +222,132 @@ ON t1.sale_price <= t2.sale_price
 AND t1.product_id != t2.product_id
 GROUP BY t1.product_name
 
+-- 交叉连结，笛卡尔积，在连结去掉ON子句
+
+-- 练习题1：找出 product 和 product2 中售价高于 500 的商品的基本信息。
+SELECT *
+FROM product
+WHERE sale_price > 500
+UNION ALL
+SELECT *
+FROM product2
+WHERE sale_price > 500;
+-- 练习题2：借助对称差的实现方式, 求product和product2的交集。
+select *
+from 
+(SELECT *
+FROM product
+UNION
+SELECT *
+FROM product2
+)t
+WHERE product_id NOT IN(
+												SELECT product_id
+												FROM product
+												WHERE product_id NOT IN (SELECT product_id
+																									 FROM product2
+																							 GROUP BY product_id)
+												UNION
+												SELECT product_id
+												FROM product2
+												WHERE product_id NOT IN (SELECT product_id
+																									 FROM product
+																							 GROUP BY product_id)
+										    );
+/*
+select *
+from TABLE1
+UNION
+SELECT *
+from TABLE2
+where xxx
+where条件在此处筛选影响的是table2还是table1 union table2的综合结果
+*/
+-- 练习题3：每类商品中售价最高的商品都在哪些商店有售 ？
+-- 每类商品 GROUP BY product.product_type
+-- 售价最高的商品 MAX(product.sale_price)
+-- 商店 LEFT JOIN
+
+select t1.*,
+			 t2.max_sale_price,
+			 t3.shop_name
+from product t1
+left join shopproduct t3
+on t1.product_id = t3.product_id
+inner JOIN(
+					select product_type,
+								 max(sale_price) as max_sale_price
+					from product
+					group by product_type
+					)t2
+on t1.product_type = t2.product_type
+and t1.sale_price = t2.max_sale_price
+
+-- 开窗函数
+SELECT *
+FROM(
+SELECT p1.product_id,
+       p1.product_name,
+			 p1.product_type,
+			 p1.sale_price,
+			 MAX(p1.sale_price) OVER (PARTITION BY p1.product_type) as max_sale_price,
+			 p2.shop_name
+FROM product p1
+LEFT JOIN shopproduct p2
+ON p1.product_id = p2.product_id
+)t
+WHERE t.sale_price = t.max_sale_price
+
+-- 参考答案
+-- 取出想要的字段
+SELECT sp.shop_id, sp.shop_name, sp.product_id ,p.product_type
+    FROM shopproduct sp
+JOIN product p
+  ON sp.product_id=p.product_id
+ WHERE sp.product_id in
+-- 过滤每个类型售价最高的商品
+(SELECT product_id 
+     FROM product p1
+ JOIN (SELECT product_type,
+              MAX(sale_price) as max_price 
+           FROM product 
+       GROUP BY product_type) p2 
+             ON p1.product_type=p2.product_type AND p1.sale_price=p2.max_price);
+
+-- 练习题4：分别使用内连结和关联子查询每一类商品中售价最高的商品。
+
+-- 内连结
+select t1.*,
+			 t2.max_sale_price
+from product t1
+inner JOIN(
+					select product_type,
+								 max(sale_price) as max_sale_price
+					from product
+					group by product_type
+					)t2
+on t1.product_type = t2.product_type
+and t1.sale_price = t2.max_sale_price
+
+-- 关联子查询
+select *
+from product t1
+WHERE sale_price in (SELECT max(sale_price) as max_sale_price
+                       from product t2
+										 where t1.product_type = t2.product_type
+										 GROUP BY product_type)
+
+
+-- 练习题5：用关联子查询实现：在 product 表中，取出 product_id, product_name, sale_price, 并按照商品的售价从低到高进行排序、对售价进行累计求和。
+select product_id,
+       product_name,
+			 sale_price,
+			 (select sum(sale_price) as sum_sale_price
+			   from  product t2
+				 where t1.sale_price > t2.sale_price
+				  or (t1.sale_price = t2.sale_price  and  t1.product_id >= t2.product_id)) as sum_sale_price
+ from product t1
+ ORDER BY t1.sale_price,t1.product_id
 
 
 
@@ -231,9 +357,6 @@ GROUP BY t1.product_name
 
 
 
-
-
-ORDER BY sp.shop_name;
 
 
 
