@@ -171,5 +171,178 @@ and request_at between date'20131001' and date'20131003'
 group by request_at
 order by request_at;
 
--- s
+-- section b
+-- 1.行转列
+select name,
+       sum(case when subject='chinese' then score else 0 end) as chinese,
+       sum(case when subject='math' then score else 0 end) as math,
+       sum(case when subject='english' then score else 0 end) as english	 
+from abc_score
+group by name
+
+-- 2.列转行
+select name,
+       'chinese' as subject,
+			 chinese as score
+from (select name,
+						 sum(case when subject='chinese' then score else 0 end) as chinese,
+						 sum(case when subject='math' then score else 0 end) as math,
+						 sum(case when subject='english' then score else 0 end) as english	 
+			from abc_score
+			group by name
+			)t
+union 
+select name,
+       'math' as subject,
+			 math as score
+from (select name,
+						 sum(case when subject='chinese' then score else 0 end) as chinese,
+						 sum(case when subject='math' then score else 0 end) as math,
+						 sum(case when subject='english' then score else 0 end) as english	 
+			from abc_score
+			group by name
+			)t
+union
+select name,
+       'english' as subject,
+			 english as score
+from (select name,
+						 sum(case when subject='chinese' then score else 0 end) as chinese,
+						 sum(case when subject='math' then score else 0 end) as math,
+						 sum(case when subject='english' then score else 0 end) as english	 
+			from abc_score
+			group by name
+			)t;
+
+-- 3.谁是明星带货主播？
+-- 定义：如果某主播的某日销售额占比达到该平台当日销售总额的 90% 及以上，则称该主播为明星主播，当天也称为明星主播日。
+-- 2021年有多少个明星主播日？
+select count(distinct date) as zhubo_date
+from(
+		select *,
+					 case when sales/(sum(sales) over(partition by date))>= 0.9 then 1
+								else 0 end as sale_90
+		from anchor_sales
+		)t
+where sale_90>0
+and date between date'20210101' and date'20211231';
+-- 2021年有多少个明星主播
+select count(distinct anchor_name) as zhubo
+from(
+		select *,
+					 case when sales/(sum(sales) over(partition by date))>= 0.9 then 1
+								else 0 end as sale_90
+		from anchor_sales
+		)t
+where sale_90>0
+and date between date'20210101' and date'20211231';
+
+-- 练习四：MySQL 中如何查看sql语句的执行计划？可以看到哪些信息？
+-- 练习五：解释一下 SQL 数据库中 ACID 是指什么
+
+-- section c
+-- 练习一：行转列
+select cdate as '比赛日期',
+       sum(case when result = '胜' then 1 else 0 end) as '胜',
+			 sum(case when result = '负' then 1 else 0 end) as '负'
+from march
+group by cdate
+
+-- 练习二：列转行
+
+
+-- 练习三：连续登录
+-- 1.计算2021年每个月，每个用户连续登录的最多天数
+select month_,max(continue_days) as max_continue_days
+from(
+			select distinct
+			       c1.month_,
+						 c1.uid,
+						 count(c1.uid) over(PARTITION by c1.month_,c1.uid,c1.minus) as continue_days
+			from(
+						select b1.month_,
+						       b1.date,
+									 b1.uid,
+									 b1.uid_date_rownum,
+									 b1.uid_date_rownum - (row_number() over(partition by b1.month_,b1.uid order by b1.date)) as minus
+						from(
+									select a1.month_,
+									       a1.date,
+												 a1.uid,
+												 a2.uid as real_uid,
+												 row_number() over(partition by a1.month_,a1.uid order by a1.date) as uid_date_rownum
+									from(
+											select month(date) as month_ ,date,uid
+											from date_2021,(select distinct uid from t_act_records) t
+											)a1
+									left join t_act_records a2
+									on a1.date = a2.imp_date
+									and a1.uid = a2.uid
+								)b1
+						where b1.real_uid is not null
+			)c1
+)d1
+group by month_;
+-- 计算2021年每个月，连续2天都有登录的用户名单
+select month_,uid
+from(
+			select distinct
+			       c1.month_,
+						 c1.uid,
+						 count(c1.uid) over(PARTITION by c1.month_,c1.uid,c1.minus) as continue_days
+			from(
+						select b1.month_,
+						       b1.date,
+									 b1.uid,
+									 b1.uid_date_rownum,
+									 b1.uid_date_rownum - (row_number() over(partition by b1.month_,b1.uid order by b1.date)) as minus
+						from(
+									select a1.month_,
+									       a1.date,
+												 a1.uid,
+												 a2.uid as real_uid,
+												 row_number() over(partition by a1.month_,a1.uid order by a1.date) as uid_date_rownum
+									from(
+											select month(date) as month_ ,date,uid
+											from date_2021,(select distinct uid from t_act_records) t
+											)a1
+									left join t_act_records a2
+									on a1.date = a2.imp_date
+									and a1.uid = a2.uid
+								)b1
+						where b1.real_uid is not null
+			)c1
+)d1
+where d1.continue_days = 2;
+-- 计算2021年每个月，连续5天都有登录的用户名单
+select month_,uid
+from(
+			select distinct
+			       c1.month_,
+						 c1.uid,
+						 count(c1.uid) over(PARTITION by c1.month_,c1.uid,c1.minus) as continue_days
+			from(
+						select b1.month_,
+						       b1.date,
+									 b1.uid,
+									 b1.uid_date_rownum,
+									 b1.uid_date_rownum - (row_number() over(partition by b1.month_,b1.uid order by b1.date)) as minus
+						from(
+									select a1.month_,
+									       a1.date,
+												 a1.uid,
+												 a2.uid as real_uid,
+												 row_number() over(partition by a1.month_,a1.uid order by a1.date) as uid_date_rownum
+									from(
+											select month(date) as month_ ,date,uid
+											from date_2021,(select distinct uid from t_act_records) t
+											)a1
+									left join t_act_records a2
+									on a1.date = a2.imp_date
+									and a1.uid = a2.uid
+								)b1
+						where b1.real_uid is not null
+			)c1
+)d1
+where d1.continue_days = 5;
 

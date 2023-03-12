@@ -188,3 +188,63 @@ insert into users values('10', 'No', 'driver');
 insert into users values('11', 'No', 'driver');
 insert into users values('12', 'No', 'driver');
 insert into users values('13', 'No', 'driver');
+
+
+-- abc_score
+create table abc_score(
+name CHAR(1) not null,
+subject VARCHAR(10) not null,
+score int not null
+);
+
+insert into abc_score values('A', 'chinese', 99);
+insert into abc_score values('A', 'math', 98);
+insert into abc_score values('A', 'english', 97);
+insert into abc_score values('B', 'chinese', 92);
+insert into abc_score values('B', 'math', 91);
+insert into abc_score values('B', 'english', 90);
+insert into abc_score values('C', 'chinese', 88);
+insert into abc_score values('C', 'math', 87);
+insert into abc_score values('C', 'english', 86);
+
+-- anchor_sales
+create table anchor_sales(
+anchor_name VARCHAR(2),
+date date,
+sales int);
+
+insert into anchor_sales values('A', '20210101', 40000);
+insert into anchor_sales values('B', '20210101', 80000);
+insert into anchor_sales values('A', '20210102', 10000);
+insert into anchor_sales values('C', '20210102', 90000);
+insert into anchor_sales values('A', '20210103', 7500);
+insert into anchor_sales values('C', '20210103', 80000);
+
+-- march
+create table march(
+cdate date,
+result VARCHAR(2)
+);
+
+insert into march values('20210101', '胜');
+insert into march values('20210101', '胜');
+insert into march values('20210101', '负');
+insert into march values('20210103', '胜');
+insert into march values('20210103', '负');
+insert into march values('20210103', '负');
+
+-- t_act_records
+DROP TABLE if EXISTS t_act_records;
+CREATE TABLE t_act_records
+(uid  VARCHAR(20),
+imp_date DATE);
+
+INSERT INTO t_act_records VALUES('u1001', 20210101);
+INSERT INTO t_act_records VALUES('u1002', 20210101);
+INSERT INTO t_act_records VALUES('u1003', 20210101);
+INSERT INTO t_act_records VALUES('u1003', 20210102);
+INSERT INTO t_act_records VALUES('u1004', 20210101);
+INSERT INTO t_act_records VALUES('u1004', 20210102);
+INSERT INTO t_act_records VALUES('u1004', 20210103);
+INSERT INTO t_act_records VALUES('u1004', 20210104);
+INSERT INTO t_act_records VALUES('u1004', 20210105);
