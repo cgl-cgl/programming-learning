@@ -346,3 +346,19 @@ from(
 )d1
 where d1.continue_days = 5;
 
+------- 参考教程后的写法
+select distinct
+       year_month_,
+       uid,
+	     count(*) over(PARTITION by year_month_,uid,uid_date_order) as continue_days
+ from(
+			-- 2.对uid组内的日期进行排序，并计算日期减去排序值的结果，如果日期连续，则相减后的结果相等
+			select year_month_,
+			       uid,
+						 imp_date,
+						 date_sub(imp_date,interval (row_number() over(PARTITION by year_month_,uid order by imp_date)) day) as uid_date_order
+			 from(
+						-- 1.去重
+						select DATE_FORMAT(imp_date,'%Y-%m') as year_month_,uid,imp_date from t_act_records group by year_month_,uid,imp_date
+						)a
+			)b
