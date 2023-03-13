@@ -362,3 +362,42 @@ select distinct
 						select DATE_FORMAT(imp_date,'%Y-%m') as year_month_,uid,imp_date from t_act_records group by year_month_,uid,imp_date
 						)a
 			)b
+
+-- 用户购买商品推荐
+select c1.user_id,c3.product_id
+from(
+			-- 找出我没吃过的东西
+			select b.user_id,b.all_product as not_product_id
+			from(
+					select a1.user_id, a1.product_id as all_product, a2.product_id
+					from(
+							select t1.user_id, t2.product_id
+							from (select distinct user_id from orders) t1,
+							(select distinct product_id from orders) t2
+							)a1
+					left join (select distinct user_id, product_id from orders) a2
+					on a1.user_id = a2.user_id
+					and a1.product_id = a2.product_id
+				)b
+			where b.product_id is null
+)c1
+inner join (
+						-- 找出我的兄弟
+						select a.user_id,a.maybe_my_brother as my_brother
+						from(
+									select distinct
+												 t1.user_id,
+												 t2.user_id as maybe_my_brother,
+												 count(t2.user_id) over (PARTITION by t1.user_id,t2.user_id) as  maybe_my_brother_count
+									from orders t1
+									left join orders t2
+									on (t1.product_id = t2.product_id
+									and t1.user_id <> t2.user_id)
+						)a
+						where maybe_my_brother_count >= 2
+)c2
+on c1.user_id = c2.user_id
+inner join orders c3
+on c1.not_product_id = c3.product_id
+AND c2.my_brother = c3.user_id
+order by c1.user_id;

@@ -248,3 +248,20 @@ INSERT INTO t_act_records VALUES('u1004', 20210102);
 INSERT INTO t_act_records VALUES('u1004', 20210103);
 INSERT INTO t_act_records VALUES('u1004', 20210104);
 INSERT INTO t_act_records VALUES('u1004', 20210105);
+
+-- orders
+create table orders(
+user_id VARCHAR(3) not null,
+product_id VARCHAR(3) not null);
+
+insert into orders values('123','1');
+insert into orders values('123','2');
+insert into orders values('123','3');
+insert into orders values('456','1');
+insert into orders values('456','2');
+insert into orders values('456','4');
+insert into orders values('789','1');
+insert into orders values('789','2');
+insert into orders values('789','5');
+insert into orders values('234','2');
+insert into orders values('234','3');
