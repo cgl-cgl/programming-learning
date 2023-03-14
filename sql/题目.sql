@@ -78,36 +78,42 @@ where count_num = 3;
 
 -- 5.判断树节点的类型
 select a.id,
-			 case when a.p_id is null then 'Root'
-			      when a.p_id is not null and b.mid_id is null then 'Leaf'
-					  else 'Inner' end as Type	
-from tree a
-left join (select DISTINCT p_id as mid_id
-             from tree)b
-on a.id = b.mid_id
-
-
-select a.id,
-			 case when a.p_id is null then 'Root'
-			      when a.p_id is not null and b.mid_id is null then 'Leaf'
-					  else 'Inner' end as Type	
-from tree a
-left join (select DISTINCT p_id as mid_id
-             from tree)b
+	   case when a.p_id is null then 'Root'
+			when a.p_id is not null and b.mid_id is null then 'Leaf'
+			else 'Inner' end as Type	
+  from tree a
+left join (select DISTINCT p_id as mid_id from tree)b
 on a.id = b.mid_id;
 
+-- 答案写法:case when中可以加入子查询，代价：效率低；每执行一行，都可能会执行一次SELECT p_id FROM tree
+SELECT id,
+       CASE WHEN p_id IS NULL THEN 'Root'
+            WHEN id IN (SELECT p_id FROM tree) THEN 'Inner'
+            ELSE 'Leaf' END AS Type
+FROM tree;
 
 -- 6.写一条SQL语句找出有5个下属的主管
 select a.name
 from employee_manager a
-left join(
-					select distinct 
-								 managerid,
-								 count(managerid) over(partition by managerid) as employee_count
-					from employee_manager
-					)b
-on a.id = b.managerid
-where b.employee_count = 5
+inner join(
+		  select managerid,
+		         count(managerid) as employee_count
+			from employee_manager
+		group by managerid
+         )b
+    on (a.id = b.managerid
+	 and b.employee_count = 5);
+
+-- 答案写法
+SELECT
+    e1. NAME
+FROM employee_manager e1
+JOIN (
+      SELECT managerid 
+        FROM employee_manager
+       GROUP BY managerid
+      HAVING count(id) = 5
+      ) t1 ON e1.id = t1.managerid;
 
 -- 7.查询回答率最高的问题
 select question_id
