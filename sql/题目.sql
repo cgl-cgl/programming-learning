@@ -118,17 +118,27 @@ JOIN (
 -- 7.查询回答率最高的问题
 select question_id
   from(
-			select *,
-						 rank() over(order by answer_rate desc) as answer_rate_order
-			from(
-						select question_id,
-									 sum(case when action='answer' then 1 else 0 end)/sum(case when action='show' then 1 else 0 end) as answer_rate
-						from survey_log
-						group by question_id
-					)t
-				)a
-where answer_rate_order = 1
+	   select *,
+			  rank() over(order by answer_rate desc) as answer_rate_order
+		 from(
+			  select question_id,
+					 sum(case when action='answer' then 1 else 0 end)/sum(case when action='show' then 1 else 0 end) as answer_rate
+				from survey_log
+			   group by question_id
+			)t
+	)a
+where answer_rate_order = 1;
 
+-- 答案做法：利用limit
+select question_id
+  from(
+		select question_id,
+			   sum(case when action='answer' then 1 else 0 end)/sum(case when action='show' then 1 else 0 end) as answer_rate
+		 from survey_log
+		group by question_id
+		order by answer_rate
+		limit 1
+	)a;
 -- 8.找出每个部门工资前三高的员工
 select a.name,
        a.employee_name,
