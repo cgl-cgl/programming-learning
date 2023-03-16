@@ -142,16 +142,16 @@ select question_id
 -- 8.找出每个部门工资前三高的员工
 select a.name,
        a.employee_name,
-			 a.salary
+	   a.salary
  from(
-			select t2.name,
-						 t1.id,
-						 t1.name as employee_name,
-						 t1.salary,
-						 dense_rank() over(partition by t2.name order by t1.salary desc) as department_salary_order
-			from employee t1
-			left join department t2
-			on t1.departmentid = t2.id
+		select t2.name,
+			   t1.id,
+			   t1.name as employee_name,
+			   t1.salary,
+			   dense_rank() over(partition by t2.name order by t1.salary desc) as department_salary_order
+		from employee t1
+		left join department t2
+		on t1.departmentid = t2.id
 		)a
 where a.department_salary_order <= 3;
 
@@ -159,42 +159,48 @@ where a.department_salary_order <= 3;
 -- 9.求出这些点中的最短距离并保留2位小数
 select DISTINCT round(dis,2) as distance
 from(
-			select a.x,
-						 a.y,
-						 b.x as x_1,
-						 b.y as y_1,
-						 power((a.x-b.x),2)+power((a.y-b.y),2) as dis,
-						 rank() over (order by (power((a.x-b.x),2)+power((a.y-b.y),2))) as rank_
-						 
-			 from(
-						select x,
-									 y,
-									 row_number() over(order by x,y) as id
-						from point_2d
-					 )a
-			left join(select x,
-											 y,
-											 row_number() over(order by x,y) as id
-									from point_2d
-								)b
+	select  a.x,
+			a.y,
+			b.x as x_1,
+			b.y as y_1,
+			power((a.x-b.x),2)+power((a.y-b.y),2) as dis,
+			rank() over (order by (power((a.x-b.x),2)+power((a.y-b.y),2))) as rank_	 
+		from(
+			select  x,
+					y,
+					row_number() over(order by x,y) as id
+				from point_2d
+		)a
+	left join(select x,
+						y,
+						row_number() over(order by x,y) as id
+				from point_2d
+			)b
 			on a.id != b.id
 )t
 where t.rank_ = 1;
 
+-- 答案简便做法
+SELECT 
+      MIN(ROUND(POW(POW(ABS(p1.x-p2.x),2)+POW(ABS(p1.y-p2.y),2),0.5),2)) AS shortest
+  FROM point_2d p1
+  JOIN point_2d p2
+    ON p1.x!=p2.x 
+    OR p1.y!=p2.y;
 -- 10.查出2013年10月1日至2013年10月3日期间非禁止用户的取消率。基于上表，你的 SQL 语句应返回如下结果，取消率（Cancellation Rate）保留两位小数。
 select request_at,
        round(sum(case when status != 'completed' then 1 else 0 end)/count(status),2) as completed_rate
 from(
-			select a.*,
-						 b.banned as client_banned,
-						 c.banned as driver_banned
-			from trips a
-			left join users b
-			on a.client_id = b.users_id
-			and b.role = 'client'
-			left join users c
-			on a.driver_id = c.users_id
-			and c.role = 'driver'
+	  select    a.*,
+				b.banned as client_banned,
+				c.banned as driver_banned
+		from trips a
+		left join users b
+		on a.client_id = b.users_id
+		and b.role = 'client'
+		left join users c
+		on a.driver_id = c.users_id
+		and c.role = 'driver'
 			)t1
 where (t1.client_banned = 'No'
 and t1.driver_banned = 'No')
@@ -205,9 +211,9 @@ order by request_at;
 -- section b
 -- 1.行转列
 select name,
-       sum(case when subject='chinese' then score else 0 end) as chinese,
-       sum(case when subject='math' then score else 0 end) as math,
-       sum(case when subject='english' then score else 0 end) as english	 
+       sum(case when subject='chinese' then score else NULL end) as chinese,
+       sum(case when subject='math' then score else NULL end) as math,
+       sum(case when subject='english' then score else NULL end) as english	 
 from abc_score
 group by name
 
@@ -250,11 +256,10 @@ from (select name,
 -- 2021年有多少个明星主播日？
 select count(distinct date) as zhubo_date
 from(
-		select *,
-					 case when sales/(sum(sales) over(partition by date))>= 0.9 then 1
-								else 0 end as sale_90
-		from anchor_sales
-		)t
+	select *,
+		   case when sales/(sum(sales) over(partition by date))>= 0.9 then 1 else 0 end as sale_90
+	from anchor_sales
+	)t
 where sale_90>0
 and date between date'20210101' and date'20211231';
 -- 2021年有多少个明星主播
