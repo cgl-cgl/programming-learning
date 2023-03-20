@@ -254,7 +254,7 @@ from (select name,
 -- 3.谁是明星带货主播？
 -- 定义：如果某主播的某日销售额占比达到该平台当日销售总额的 90% 及以上，则称该主播为明星主播，当天也称为明星主播日。
 -- 2021年有多少个明星主播日？
-select count(distinct date) as zhubo_date
+select count(distinct anchor_name) as zhubo_date
 from(
 	select *,
 		   case when sales/(sum(sales) over(partition by date))>= 0.9 then 1 else 0 end as sale_90
@@ -284,7 +284,25 @@ select cdate as '比赛日期',
 from march
 group by cdate
 
--- 练习二：列转行
+-- 练习二：列转行（答案）
+SELECT 
+        a.date_time AS cdate
+        ,'胜' AS result 
+        ,b.help_topic_id
+FROM 
+        col_row AS a 
+INNER JOIN mysql.help_topic AS b ON b.help_topic_id < a.success
+UNION ALL 
+SELECT 
+        a.date_time AS cdate
+        ,'负' AS result 
+        ,b.help_topic_id
+FROM 
+        col_row AS a 
+INNER JOIN mysql.help_topic AS b ON b.help_topic_id < a.fail 
+ORDER BY 
+        cdate, 
+        result;
 
 
 -- 练习三：连续登录

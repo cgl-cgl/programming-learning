@@ -234,6 +234,16 @@ insert into march values('20210103', '胜');
 insert into march values('20210103', '负');
 insert into march values('20210103', '负');
 
+-- col_row
+create table col_row(
+date_time date,
+success int,
+fail int);
+
+INSERT into col_row values('2021-01-01',4,1);
+INSERT into col_row values('2021-01-03',1,4);
+
+
 -- t_act_records
 DROP TABLE if EXISTS t_act_records;
 CREATE TABLE t_act_records

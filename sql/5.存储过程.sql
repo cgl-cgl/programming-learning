@@ -18,3 +18,35 @@ delimiter;
 
 call producttype('厨房用具', @product_type_num);
 select @product_type_num;
+
+
+PREPARE stmt1 FROM 
+	'SELECT 
+   	    product_id, 
+            product_name 
+	FROM product
+        WHERE product_id = ?';
+SET @pcid = '0005';
+EXECUTE stmt1 USING @pcid;
+DEALLOCATE PREPARE stmt1;
+
+
+-- 练习题
+CREATE DEFINER=`root`@`localhost` PROCEDURE `create_multi_table`()
+BEGIN
+    #Routine body goes here...
+    declare i int;
+    set i=1;
+    while i<21 do
+        IF i<10 THEN
+            set @tb = CONCAT('create table table0',i,' like product');
+        ELSE
+            set @tb = CONCAT('create table table', i,' like product');
+        END IF;
+        PREPARE create_stmt FROM @tb;
+        EXECUTE create_stmt;
+        SET i=i+1;
+    end while;
+
+END;
+call `create_multi_table`();
