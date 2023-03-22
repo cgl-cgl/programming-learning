@@ -455,3 +455,12 @@ inner join orders c3
 on c1.not_product_id = c3.product_id
 AND c2.my_brother = c3.user_id
 order by c1.user_id;
+
+
+/*以下详细资料可查看：https://xz9235vqyp.feishu.cn/docs/doccnruf8gPtnAm9gbxKJRU0pZf*/
+/*查看执行计划：在sql语句前面加上explain即可查看*/
+/*数据倾斜：由于数据分布不均匀，造成数据大量的集中到一点，造成数据热点，常见现象是：任务进度长时间维持在 99%或者 100%的附近，
+          查看任务监控页面，发现只有少量 reduce 子任务未完成，因为其处理的数据量和其他的 reduce 差异过大。 单一 reduce 
+		  处理的记录数和平均记录数相差太大，通常达到好几倍之多，最长时间远大 于平均时长。
+		  可参考链接：https://www.cnblogs.com/qingyunzong/p/8847597.html
+*/
