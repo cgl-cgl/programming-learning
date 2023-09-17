@@ -112,19 +112,19 @@ select t1.shop_id,
  */
  -- 关联子查询
  select t1.shop_id,
-							t1.product_id,
-							t2.sale_price
-				from shopproduct t1
-       INNER JOIN product t2 
-			  on t1.product_id = t2.product_id 
+		t1.product_id,
+		t2.sale_price
+   from shopproduct t1
+INNER JOIN product t2 
+	 on t1.product_id = t2.product_id 
 where t2.sale_price  = (SELECT max(a.sale_price)
-                        from (select t1.shop_id,
-																			t1.product_id,
-																			t2.sale_price
-																from shopproduct t1
-															 INNER JOIN product t2 
-																on t1.product_id = t2.product_id )a
-												where t1.shop_id = a.shop_id);
+                          from (select t1.shop_id,
+									   t1.product_id,
+									   t2.sale_price
+								  from shopproduct t1
+							INNER JOIN product t2 
+									on t1.product_id = t2.product_id )a
+						 where t1.shop_id = a.shop_id);
 -- 联结
 select a.*
 from 
